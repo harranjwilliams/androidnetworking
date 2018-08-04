@@ -6,9 +6,9 @@ public class Earthquake {
 
     private double magnitude;
     private String location;
-    private Date date;
+    private long date;
 
-    public Earthquake(double magnitude, String location, Date date) {
+    public Earthquake(double magnitude, String location, long date) {
         this.magnitude = magnitude;
         this.location = location;
         this.date = date;
@@ -22,7 +22,7 @@ public class Earthquake {
         return location;
     }
 
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 }
