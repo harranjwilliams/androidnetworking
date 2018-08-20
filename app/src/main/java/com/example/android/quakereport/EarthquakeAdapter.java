@@ -23,8 +23,11 @@ import java.util.List;
 public class EarthquakeAdapter extends RecyclerView.Adapter<EarthquakeAdapter.EarthquakeViewHolder> {
 
     public static final String LOG_TAG = EarthquakeAdapter.class.getName();
+    public static final String OF = "of";
+    public final String mNearThe;
 
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+    private DateFormat dateFormat = new SimpleDateFormat("LLL dd, yyyy");
+    private DateFormat timeFormat = new SimpleDateFormat("h:mm a");
 
     private List<Earthquake> mEarthquakes;
 
@@ -36,22 +39,27 @@ public class EarthquakeAdapter extends RecyclerView.Adapter<EarthquakeAdapter.Ea
         //super(context, 0, earthquakes);
 
         mEarthquakes = earthquakes;
-        Log.i(LOG_TAG, "Earthquakes list size = " + mEarthquakes.size());
+        mNearThe = context.getString(R.string.near_the);
+        Log.d(LOG_TAG, "Earthquakes list size = " + mEarthquakes.size());
 
     }
 
     public class EarthquakeViewHolder extends RecyclerView.ViewHolder{
 
         public final TextView mMagnitudeView;
-        public final TextView mLocationView;
+        public final TextView mLocationOffsetView;
+        public final TextView mLocationPrimaryView;
         public final TextView mDateView;
+        public final TextView mTimeView;
 
         public EarthquakeViewHolder(View itemView) {
             super(itemView);
 
             mMagnitudeView = itemView.findViewById(R.id.magnitude);
-            mLocationView = itemView.findViewById(R.id.location);
+            mLocationOffsetView = itemView.findViewById(R.id.location_offset);
+            mLocationPrimaryView = itemView.findViewById(R.id.location_primary);
             mDateView = itemView.findViewById(R.id.date);
+            mTimeView = itemView.findViewById(R.id.time);
         }
     }
 
@@ -65,7 +73,6 @@ public class EarthquakeAdapter extends RecyclerView.Adapter<EarthquakeAdapter.Ea
         View view = layoutInflater.inflate(R.layout.list_item, parent, attachToRoot);
         EarthquakeViewHolder viewHolder = new EarthquakeViewHolder(view);
 
-        Log.i(LOG_TAG, "View holder created");
         return viewHolder;
     }
 
@@ -76,20 +83,37 @@ public class EarthquakeAdapter extends RecyclerView.Adapter<EarthquakeAdapter.Ea
 
         String magnitude = Double.toString(earthquake.getMagnitude());
         String location = earthquake.getLocation();
-        String date = dateFormat.format(new Date(earthquake.getDate()));
 
-        Log.i(LOG_TAG, "Position = " + position + " Magnitude = " + magnitude + " Location = " + location + " Date = " + date);
+        String offsetLocation = mNearThe;
+        String primaryLocation = location;
+        if (location.contains(OF)) {
+            // The offset location is provided.  Get it and set it to the offset location view
+            int indexLocation = location.indexOf(OF);
+            int endIndex = indexLocation + OF.length();
+            offsetLocation = location.substring(0, endIndex);
+            primaryLocation = location.substring(endIndex);
+        }
+
+        Date dateTime = new Date(earthquake.getDate());
+        String date = dateFormat.format(dateTime);
+        String time = timeFormat.format(dateTime);
+
+        Log.d(LOG_TAG, "onBindViewHolder: Position = " + position + " Magnitude = " + magnitude + " Location = " + location + " Date = " + date);
 
         holder.mMagnitudeView.setText(magnitude);
-        holder.mLocationView.setText(location);
+        holder.mLocationOffsetView.setText(offsetLocation);
+        holder.mLocationPrimaryView.setText(primaryLocation);
         holder.mDateView.setText(date);
+        holder.mTimeView.setText(time);
     }
 
     @Override
     public int getItemCount() {
         if (mEarthquakes == null) {
+            Log.d(LOG_TAG, "getItemCount: earthquake size = null");
             return 0;
         }
+        Log.d(LOG_TAG, "getItemCount: earthquake size = " + mEarthquakes.size());
         return mEarthquakes.size();
     }
 
